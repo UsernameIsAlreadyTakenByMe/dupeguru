@@ -1,5 +1,26 @@
 ## How to build dupeGuru for Windows
 
+### Very quick start with chocolatey already installed:
+
+Installing Prerequisites with chocolatey and running the latest version from git :) ( It works now: 2021-12-29... I'm sure this workflow will break fast, but it's super easy now :) )
+
+choco install git
+choco install python3
+choco install visualstudio2019community
+choco install windows-sdk-10.1
+choco install nsis
+choco install msys2
+python -m pip install --upgrade pip
+python -m pip install --upgrade setuptools
+git clone https://github.com/arsenetar/dupeguru.git
+cd dupeguru
+py -3.10 -m venv .\env
+.\env\Scripts\activate.bat
+pip install -r requirements.txt
+python build.py
+python run.py
+
+
 ### Prerequisites
 
 - [Python 3.6+][python]
