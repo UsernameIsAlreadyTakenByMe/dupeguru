@@ -187,3 +187,23 @@ class TestCaseavgdiff:
         blocks1 = [ref, ref]
         blocks2 = [ref, ref]
         eq_(0, my_avgdiff(blocks1, blocks2))
+
+
+def test_prepare_pictures_invalid_orientation():
+    from core.pe.matchblock import prepare_pictures
+
+    class FakePic:
+        path = "fake.jpg"
+        unicode_path = "fake.jpg"
+        size = 100
+        dimensions = (10, 10)
+
+        def get_orientation(self):
+            return 9  # Out of range EXIF orientation > 8
+
+        def get_blocks(self, count, orientation=1):
+            return [(0, 0, 0)] * 100
+
+    pic = FakePic()
+    prepared = prepare_pictures([pic], cache_path=":memory:", with_dimensions=False, match_rotated=False)
+    eq_([pic], prepared)

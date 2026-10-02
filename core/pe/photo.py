@@ -44,7 +44,8 @@ class Photo(fs.File):
                     exifdata = exif.get_fields(fp)
                     # the value is a list (probably one-sized) of ints
                     orientations = exifdata["Orientation"]
-                    self._cached_orientation = orientations[0]
+                    orientation = orientations[0]
+                    self._cached_orientation = orientation if 1 <= orientation <= 8 else 0
             except Exception:  # Couldn't read EXIF data, no transforms
                 self._cached_orientation = 0
         return self._cached_orientation

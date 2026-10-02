@@ -83,7 +83,9 @@ def prepare_pictures(pictures, cache_path, with_dimensions, match_rotated, j=job
                         blocks = [picture.get_blocks(BLOCK_COUNT_PER_SIDE, orientation) for orientation in range(1, 9)]
                     else:
                         blocks = [[]] * 8
-                        blocks[max(picture.get_orientation() - 1, 0)] = picture.get_blocks(BLOCK_COUNT_PER_SIDE)
+                        orientation = picture.get_orientation()
+                        idx = orientation - 1 if 1 <= orientation <= 8 else 0
+                        blocks[idx] = picture.get_blocks(BLOCK_COUNT_PER_SIDE)
                     cache[picture.unicode_path] = blocks
                 prepared.append(picture)
             except (OSError, ValueError) as e:
