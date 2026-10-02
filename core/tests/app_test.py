@@ -76,6 +76,29 @@ class TestCaseDupeGuru:
             eq_(call["dest_path"], Path(tmp_dir, "foo"))
             eq_(call["source_path"], f.path)
 
+    def test_copy_or_move_relative_without_location_path(self, tmpdir, monkeypatch):
+        # Issue #1334: When moving/copying dupes where the file's parent directory is not in
+        # self.directories (e.g. from saved results or modified folder list), location_path is None.
+        p = Path(str(tmpdir))
+        foo_path = p.joinpath("sub", "foo")
+        foo_path.parent.mkdir(parents=True)
+        foo_path.touch()
+        monkeypatch.setattr(
+            hscommon.conflict,
+            "smart_copy",
+            log_calls(lambda source_path, dest_path: None),
+        )
+        monkeypatch.setattr(app, "smart_copy", hscommon.conflict.smart_copy)
+        monkeypatch.setattr(os, "makedirs", lambda path: None)
+        dgapp = TestApp().app
+        # Note: Do not add p to dgapp.directories, simulating saved results where location_path is None
+        f = fs.File(foo_path)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            dgapp.copy_or_move(f, True, tmp_dir, app.DestType.RELATIVE)
+            eq_(1, len(hscommon.conflict.smart_copy.calls))
+            call = hscommon.conflict.smart_copy.calls[0]
+            eq_(call["source_path"], f.path)
+
     def test_copy_or_move_clean_empty_dirs(self, tmpdir, monkeypatch):
         tmppath = Path(str(tmpdir))
         sourcepath = tmppath.joinpath("source")
