@@ -274,6 +274,40 @@ def test_load_from_file_with_invalid_path(tmpdir):
     eq_(1, len(d2))
 
 
+def test_add_path_oserror(monkeypatch):
+    d = Directories()
+    p = Path("inaccessible_path")
+
+    def mock_exists(self):
+        raise OSError("[WinError 1326] The user name or password is incorrect")
+
+    monkeypatch.setattr(Path, "exists", mock_exists)
+    with raises(InvalidPathError):
+        d.add_path(p)
+
+
+def test_load_from_file_with_inaccessible_path(tmpdir, monkeypatch):
+    d1 = Directories()
+    d1.add_path(testpath.joinpath("onefile"))
+    p = Path(str(tmpdir.join("inaccessible")))
+    p.mkdir()
+    d1.add_path(p)
+    tmpxml = str(tmpdir.join("directories_testunit.xml"))
+    d1.save_to_file(tmpxml)
+
+    original_exists = Path.exists
+
+    def mock_exists(self):
+        if self == p:
+            raise OSError("[WinError 1326] The user name or password is incorrect")
+        return original_exists(self)
+
+    monkeypatch.setattr(Path, "exists", mock_exists)
+    d2 = Directories()
+    d2.load_from_file(tmpxml)
+    eq_(1, len(d2))
+
+
 def test_unicode_save(tmpdir):
     d = Directories()
     p1 = Path(str(tmpdir), "hello\xe9")

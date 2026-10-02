@@ -157,7 +157,10 @@ class Directories:
         """
         if path in self:
             raise AlreadyThereError()
-        if not path.exists():
+        try:
+            if not path.exists():
+                raise InvalidPathError()
+        except OSError:
             raise InvalidPathError()
         self._dirs = [p for p in self._dirs if path not in p.parents]
         self._dirs.append(path)
@@ -256,7 +259,7 @@ class Directories:
             path = attrib["path"]
             try:
                 self.add_path(Path(path))
-            except (AlreadyThereError, InvalidPathError):
+            except (AlreadyThereError, InvalidPathError, OSError):
                 pass
         for sn in root.iter("state"):
             attrib = sn.attrib
